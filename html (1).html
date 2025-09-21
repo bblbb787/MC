@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC资源分享站 - 管理员面板</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+        }
+        
+        .admin-login {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+        
+        .admin-btn {
+            background-color: #FF9800;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .admin-btn:hover {
+            background-color: #F57C00;
+        }
+        
+        nav {
+            background-color: #388E3C;
+        }
+        
+        .nav-list {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+        }
+        
+        .nav-list li {
+            margin: 0;
+        }
+        
+        .nav-list a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-list a:hover, .nav-list a.active {
+            background-color: #2E7D32;
+        }
+        
+        .content-section {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .resource-grid, .tutorial-grid, .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .resource-card, .tutorial-card, .server-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .resource-card:hover, .tutorial-card:hover, .server-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-img {
+            height: 160px;
+            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        
+        .card-content {
+            padding: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2E7D32;
+        }
+        
+        .card-desc {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .download-btn, .read-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .download-btn:hover, .read-btn:hover {
+            background-color: #388E3C;
+        }
+        
+        .qq-group-btn {
+            background-color: #12B7F5;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        
+        .qq-group-btn:hover {
+            background-color: #0E9ED6;
+        }
+        
+        .admin-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .edit-btn, .delete-btn {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .edit-btn:hover {
+            background: #2196F3;
+        }
+        
+        .delete-btn:hover {
+            background: #F44336;
+        }
+        
+        footer {
+            background-color: #2E7D32;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        /* 登录模态框 */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-modal.active {
+            display: flex;
+        }
+        
+        .login-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2E7D32;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #388E3C;
+        }
+        
+        .error-message {
+            color: #F44336;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        /* 添加/编辑模态框 */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .edit-modal.active {
+            display: flex;
+        }
+        
+        .edit-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .edit-form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2E7D32;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .save-btn, .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #9E9E9E;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .resource-grid, .tutorial-grid, .server-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-list {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                MC资源分享站
+            </div>
+            <div class="admin-login">
+                <a class="admin-btn" id="adminLoginBtn">管理员登录</a>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul class="nav-list">
+                <li><a href="#" class="nav-link active" data-target="resources">MC资源</a></li>
+                <li><a href="#" class="nav-link" data-target="tutorials">MC教程</a></li>
+                <li><a href="#" class="nav-link" data-target="servers">服务器推荐</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <section id="resources" class="content-section active">
+            <h2 class="section-title">MC资源下载</h2>
+            <p>精选我的世界资源下载，包括模组、地图、材质包等。</p>
+            
+            <div class="resource-grid" id="resourceGrid">
+                <!-- 资源卡片将通过JS动态生成 -->
+            </div>
+        </section>
+        
+        <section id="tutorials" class="content-section">
+            <h2 class="section-title">MC教程指南</h2>
+            <p>学习我的世界游戏技巧、红石技术和建筑方法。</p>
+            
+            <div class="tutorial-grid" id="tutorialGrid">
+                <!-- 教程卡片将通过JS动态生成 -->
+            </div>
+        </section>
+        
+        <section id="servers" class="content-section">
+            <h2 class="section-title">服务器推荐</h2>
+            <p>精选我的世界服务器，点击加入QQ群了解更多信息。</p>
+            
+            <div class="server-grid" id="serverGrid">
+                <!-- 服务器卡片将通过JS动态生成 -->
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>© 2025 MC资源分享站 | 提供我的世界资源、教程和服务器信息</p>
+        </div>
+    </footer>
+
+    <!-- 登录模态框 -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-form">
+            <h2>管理员登录</h2>
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <button class="login-btn" id="loginSubmit">登录</button>
+            <div class="error-message" id="loginError">用户名或密码错误</div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑模态框 -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-form">
+            <h2 id="editModalTitle">添加新内容</h2>
+            <div class="form-group">
+                <label for="contentType">内容类型</label>
+                <select id="contentType" class="form-control">
+                    <option value="resource">MC资源</option>
+                    <option value="tutorial">MC教程</option>
+                    <option value="server">服务器推荐</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="editTitle">标题</label>
+                        <input type="text" id="editTitle" placeholder="请输入标题">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="editIcon">图标</label>
+                        <select id="editIcon" class="form-control">
+                            <option value="fa-puzzle-piece">模组</option>
+                            <option value="fa-mountain">材质</option>
+                            <option value="fa-map">地图</option>
+                            <option value="fa-bolt">红石</option>
+                            <option value="fa-home">建筑</option>
+                            <option value="fa-dragon">生存</option>
+                            <option value="fa-users">服务器</option>
+                            <option value="fa-gamepad">小游戏</option>
+                            <option value="fa-shield-alt">生存</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editDesc">描述</label>
+                <input type="text" id="editDesc" placeholder="请输入描述">
+            </div>
+            
+            <div class="form-group" id="downloadField">
+                <label for="editDownload">下载文件名</label>
+                <input type="text" id="editDownload" placeholder="例如: tech_revival_mod.zip">
+            </div>
+            
+            <div class="form-group" id="qqField" style="display: none;">
+                <label for="editQQ">QQ群密钥</label>
+                <input type="text" id="editQQ" placeholder="例如: 你的QQ群密钥">
+            </div>
+            
+            <div class="form-buttons">
+                <button class="save-btn" id="saveContent">保存</button>
+                <button class="cancel-btn" id="cancelEdit">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 管理员状态
+        let isAdmin = false;
+        let currentEditId = null;
+        let currentEditType = null;
+        
+        // 数据结构
+        const data = {
+            resources: [
+                { id: 'res1', title: '科技复兴模组', desc: '添加了大量科技元素和自动化设备，适合喜欢工业的玩家。', icon: 'fa-puzzle-piece', download: 'tech_revival_mod.zip' },
+                { id: 'res2', title: '幻想材质包', desc: '高清幻想风格材质包，让我的世界变得更加绚丽多彩。', icon: 'fa-mountain', download: 'fantasy_texture_pack.zip' },
+                { id: 'res3', title: '冒险者地图', desc: '包含多种谜题和挑战的冒险地图，探索未知的世界。', icon: 'fa-map', download: 'adventure_map.zip' }
+            ],
+            tutorials: [
+                { id: 'tut1', title: '红石基础教程', desc: '从零开始学习红石技术，掌握自动化原理。', icon: 'fa-bolt', download: '' },
+                { id: 'tut2', title: '现代建筑指南', desc: '学习如何建造现代化建筑，提升你的建筑设计能力。', icon: 'fa-home', download: '' },
+                { id: 'tut3', title: '生存模式进阶', desc: '掌握生存模式高级技巧，轻松应对各种挑战。', icon: 'fa-dragon', download: '' }
+            ],
+            servers: [
+                { id: 'srv1', title: '梦想之城', desc: '一个友好的生存服务器，欢迎新手玩家！', icon: 'fa-users', qqKey: 'key1' },
+                { id: 'srv2', title: '小游戏天堂', desc: '多种小游戏玩法，起床战争、空岛战争等。', icon: 'fa-gamepad', qqKey: 'key2' },
+                { id: 'srv3', title: '硬核生存', desc: '高难度生存服务器，适合寻求挑战的玩家。', icon: 'fa-shield-alt', qqKey: 'key3' }
+            ]
+        };
+        
+        // QQ群链接配置
+        const qqGroupLinks = {
+            "key1": "https://jq.qq.com/?_wv=1027&k=你的QQ群密钥1",
+            "key2": "https://jq.qq.com/?_wv=1027&k=你的QQ群密钥2",
+            "key3": "https://jq.qq.com/?_wv=1027&k=你的QQ群密钥3"
+        };
+        
+        // DOM元素
+        const loginModal = document.getElementById('loginModal');
+        const editModal = document.getElementById('editModal');
+        const loginError = document.getElementById('loginError');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const loginSubmit = document.getElementById('loginSubmit');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const saveContent = document.getElementById('saveContent');
+        const contentTypeSelect = document.getElementById('contentType');
+        const downloadField = document.getElementById('downloadField');
+        const qqField = document.getElementById('qqField');
+        
+        // 初始化页面
+        function initPage() {
+            renderResources();
+            renderTutorials();
+            renderServers();
+            setupEventListeners();
+            checkAdminStatus();
+        }
+        
+        // 渲染资源列表
+        function renderResources() {
+            const grid = document.getElementById('resourceGrid');
+            grid.innerHTML = '';
+            
+            data.resources.forEach(item => {
+                const card = createResourceCard(item);
+                grid.appendChild(card);
+            });
+            
+            // 添加新资源按钮
+            if (isAdmin) {
+                const addCard = document.createElement('div');
+                addCard.className = 'resource-card';
+                addCard.innerHTML = `
+                    <div class="card-img" style="cursor: pointer;" onclick="openAddModal('resource')">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">添加新资源</h3>
+                        <p class="card-desc">点击添加新的MC资源</p>
+                    </div>
+                `;
+                grid.appendChild(addCard);
+            }
+        }
+        
+        // 创建资源卡片
+        function createResourceCard(item) {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+            card.innerHTML = `
+                <div class="card-img">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${item.title}</h3>
+                    <p class="card-desc">${item.desc}</p>
+                    <a href="resources/${item.download}" class="download-btn" download>下载</a>
+                </div>
+            `;
+            
+            if (isAdmin) {
+                const adminActions = document.createElement('div');
+                adminActions.className = 'admin-actions';
+                adminActions.innerHTML = `
+                    <div class="edit-btn" onclick="openEditModal('resource', '${item.id}')">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="delete-btn" onclick="deleteItem('resource', '${item.id}')">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                card.appendChild(adminActions);
+            }
+            
+            return card;
+        }
+        
+        // 渲染教程列表
+        function renderTutorials() {
+            const grid = document.getElementById('tutorialGrid');
+            grid.innerHTML = '';
+            
+            data.tutorials.forEach(item => {
+                const card = createTutorialCard(item);
+                grid.appendChild(card);
+            });
+            
+            // 添加新教程按钮
+            if (isAdmin) {
+                const addCard = document.createElement('div');
+                addCard.className = 'tutorial-card';
+                addCard.innerHTML = `
+                    <div class="card-img" style="cursor: pointer;" onclick="openAddModal('tutorial')">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">添加新教程</h3>
+                        <p class="card-desc">点击添加新的MC教程</p>
+                    </div>
+                `;
+                grid.appendChild(addCard);
+            }
+        }
+        
+        // 创建教程卡片
+        function createTutorialCard(item) {
+            const card = document.createElement('div');
+            card.className = 'tutorial-card';
+            card.innerHTML = `
+                <div class="card-img">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${item.title}</h3>
+                    <p class="card-desc">${item.desc}</p>
+                    <a href="#" class="read-btn">阅读</a>
+                </div>
+            `;
+            
+            if (isAdmin) {
+                const adminActions = document.createElement('div');
+                adminActions.className = 'admin-actions';
+                adminActions.innerHTML = `
+                    <div class="edit-btn" onclick="openEditModal('tutorial', '${item.id}')">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="delete-btn" onclick="deleteItem('tutorial', '${item.id}')">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                card.appendChild(adminActions);
+            }
+            
+            return card;
+        }
+        
+        // 渲染服务器列表
+        function renderServers() {
+            const grid = document.getElementById('serverGrid');
+            grid.innerHTML = '';
+            
+            data.servers.forEach(item => {
+                const card = createServerCard(item);
+                grid.appendChild(card);
+            });
+            
+            // 添加新服务器按钮
+            if (isAdmin) {
+                const addCard = document.createElement('div');
+                addCard.className = 'server-card';
+                addCard.innerHTML = `
+                    <div class="card-img" style="cursor: pointer;" onclick="openAddModal('server')">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">添加新服务器</h3>
+                        <p class="card-desc">点击添加新的MC服务器</p>
+                    </div>
+                `;
+                grid.appendChild(addCard);
+            }
+        }
+        
+        // 创建服务器卡片
+        function createServerCard(item) {
+            const card = document.createElement('div');
+            card.className = 'server-card';
+            card.innerHTML = `
+                <div class="card-img">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${item.title}</h3>
+                    <p class="card-desc">${item.desc}</p>
+                    <a href="${qqGroupLinks[item.qqKey]}" class="qq-group-btn" target="_blank">加入QQ群</a>
+                </div>
+            `;
+            
+            if (isAdmin) {
+                const adminActions = document.createElement('div');
+                adminActions.className = 'admin-actions';
+                adminActions.innerHTML = `
+                    <div class="edit-btn" onclick="openEditModal('server', '${item.id}')">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="delete-btn" onclick="deleteItem('server', '${item.id}')">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                card.appendChild(adminActions);
+            }
+            
+            return card;
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航切换
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 更新导航活动状态
+                    document.querySelectorAll('.nav-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // 显示对应内容区域
+                    const target = this.getAttribute('data-target');
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+            
+            // 管理员登录按钮
+            adminLoginBtn.addEventListener('click', () => {
+                loginModal.classList.add('active');
+            });
+            
+            // 登录提交
+            loginSubmit.addEventListener('click', () => {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username === 'admin' && password === 'Wang2013') {
+                    isAdmin = true;
+                    localStorage.setItem('mcAdmin', 'true');
+                    loginModal.classList.remove('active');
+                    checkAdminStatus();
+                    renderAllContent();
+                } else {
+                    loginError.style.display = 'block';
+                }
+            });
+            
+            // 内容类型选择
+            contentTypeSelect.addEventListener('change', function() {
+                if (this.value === 'server') {
+                    downloadField.style.display = 'none';
+                    qqField.style.display = 'block';
+                } else {
+                    downloadField.style.display = 'block';
+                    qqField.style.display = 'none';
+                }
+            });
+            
+            // 取消编辑
+            cancelEdit.addEventListener('click', () => {
+                editModal.classList.remove('active');
+            });
+            
+            // 保存内容
+            saveContent.addEventListener('click', saveItem);
+        }
+        
+        // 检查管理员状态
+        function checkAdminStatus() {
+            if (localStorage.getItem('mcAdmin') === 'true') {
+                isAdmin = true;
+                adminLoginBtn.textContent = '管理员已登录';
+                adminLoginBtn.style.backgroundColor = '#4CAF50';
+            } else {
+                isAdmin = false;
+                adminLoginBtn.textContent = '管理员登录';
+                adminLoginBtn.style.backgroundColor = '#FF9800';
+            }
+        }
+        
+        // 渲染所有内容
+        function renderAllContent() {
+            renderResources();
+            renderTutorials();
+            renderServers();
+        }
+        
+        // 打开添加模态框
+        function openAddModal(type) {
+            currentEditType = type;
+            currentEditId = null;
+            
+            document.getElementById('editModalTitle').textContent = `添加${getTypeName(type)}`;
+            document.getElementById('contentType').value = type;
+            document.getElementById('editTitle').value = '';
+            document.getElementById('editDesc').value = '';
+            document.getElementById('editDownload').value = '';
+            document.getElementById('editQQ').value = '';
+            
+            if (type === 'server') {
+                downloadField.style.display = 'none';
+                qqField.style.display = 'block';
+            } else {
+                downloadField.style.display = 'block';
+                qqField.style.display = 'none';
+            }
+            
+            editModal.classList.add('active');
+        }
+        
+        // 打开编辑模态框
+        function openEditModal(type, id) {
+            currentEditType = type;
+            currentEditId = id;
+            
+            const item = data[type + 's'].find(i => i.id === id);
+            if (!item) return;
+            
+            document.getElementById('editModalTitle').textContent = `编辑${getTypeName(type)}`;
+            document.getElementById('contentType').value = type;
+            document.getElementById('editTitle').value = item.title;
+            document.getElementById('editDesc').value = item.desc;
+            
+            // 设置图标选择
+            const iconSelect = document.getElementById('editIcon');
+            for (let i = 0; i < iconSelect.options.length; i++) {
+                if (iconSelect.options[i].value === item.icon) {
+                    iconSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            if (type === 'resource') {
+                downloadField.style.display = 'block';
+                qqField.style.display = 'none';
+                document.getElementById('editDownload').value = item.download || '';
+            } else if (type === 'tutorial') {
+                downloadField.style.display = 'block';
+                qqField.style.display = 'none';
+                document.getElementById('editDownload').value = item.download || '';
+            } else if (type === 'server') {
+                downloadField.style.display = 'none';
+                qqField.style.display = 'block';
+                document.getElementById('editQQ').value = item.qqKey || '';
+            }
+            
+            editModal.classList.add('active');
+        }
+        
+        // 获取类型名称
+        function getTypeName(type) {
+            switch (type) {
+                case 'resource': return 'MC资源';
+                case 'tutorial': return 'MC教程';
+                case 'server': return '服务器';
+                default: return '内容';
+            }
+        }
+        
+        // 保存项目
+        function saveItem() {
+            const type = document.getElementById('contentType').value;
+            const title = document.getElementById('editTitle').value;
+            const desc = document.getElementById('editDesc').value;
+            const icon = document.getElementById('editIcon').value;
+            
+            if (!title || !desc) {
+                alert('请填写标题和描述');
+                return;
+            }
+            
+            if (currentEditId) {
+                // 编辑现有项目
+                const index = data[type + 's'].findIndex(i => i.id === currentEditId);
+                if (index !== -1) {
+                    data[type + 's'][index].title = title;
+                    data[type + 's'][index].desc = desc;
+                    data[type + 's'][index].icon = icon;
+                    
+                    if (type === 'resource' || type === 'tutorial') {
+                        data[type + 's'][index].download = document.getElementById('editDownload').value;
+                    } else if (type === 'server') {
+                        data[type + 's'][index].qqKey = document.getElementById('editQQ').value;
+                    }
+                }
+            } else {
+                // 添加新项目
+                const newId = type + (Date.now().toString(36));
+                const newItem = {
+                    id: newId,
+                    title: title,
+                    desc: desc,
+                    icon: icon
+                };
+                
+                if (type === 'resource' || type === 'tutorial') {
+                    newItem.download = document.getElementById('editDownload').value;
+                } else if (type === 'server') {
+                    newItem.qqKey = document.getElementById('editQQ').value;
+                }
+                
+                data[type + 's'].push(newItem);
+            }
+            
+            editModal.classList.remove('active');
+            renderAllContent();
+        }
+        
+        // 删除项目
+        function deleteItem(type, id) {
+            if (!confirm('确定要删除这个项目吗？')) return;
+            
+            const index = data[type + 's'].findIndex(i => i.id === id);
+            if (index !== -1) {
+                data[type + 's'].splice(index, 1);
+                renderAllContent();
+            }
+        }
+        
+        // 页面加载时初始化
+        window.onload = initPage;
+        
+        // 全局函数声明
+        window.openAddModal = openAddModal;
+        window.openEditModal = openEditModal;
+        window.deleteItem = deleteItem;
+    </script>
+</body>
+</html>
